@@ -422,7 +422,7 @@
                             <i class="fas fa-files"></i>
                         </div>
                         <div class="drop-text">Drop multiple files here</div>
-                        <div class="drop-subtext">or click to select files</div>
+                        <div class="drop-subtext">Each file will download as separate PDF</div>
                         <input type="file" id="batchFiles" name="files" multiple accept=".png,.jpg,.jpeg,.bmp,.tiff,.gif,.txt,.md,.docx,.xlsx,.xls">
                     </div>
                     
@@ -477,7 +477,7 @@
     </div>
     
     <footer>
-        <p>&copy; 2025 PDF Converter Pro. All rights reserved.</p>
+        <p>&copy; 2025 PDF Converter Pro. All rights reserved by .</p>
     </footer>
 
     <script>
@@ -584,7 +584,6 @@
         
         document.getElementById('batchForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const formData = new FormData();
             const files = document.getElementById('batchFiles').files;
             
             if (files.length === 0) {
@@ -592,37 +591,42 @@
                 return;
             }
             
-            for (let file of files) {
-                formData.append('files', file);
-            }
-            
             document.getElementById('batchLoading').style.display = 'block';
             document.getElementById('batchError').textContent = '';
             
             try {
-                const response = await fetch('/batch-convert', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'converted_files.zip';
-                    a.click();
-                    window.URL.revokeObjectURL(url);
+                for (let i = 0; i < files.length; i++) {
+                    const formData = new FormData();
+                    formData.append('file', files[i]);
                     
-                    document.getElementById('batchFiles').value = '';
-                    const dropText = batchDropZone.querySelector('.drop-text');
-                    const dropSubtext = batchDropZone.querySelector('.drop-subtext');
-                    dropText.textContent = 'Drop multiple files here';
-                    dropSubtext.textContent = 'or click to select files';
-                } else {
-                    const error = await response.json();
-                    document.getElementById('batchError').textContent = error.error;
+                    const response = await fetch('/convert', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = files[i].name.replace(/\.[^/.]+$/, '') + '.pdf';
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    } else {
+                        const error = await response.json();
+                        console.error(`Error converting ${files[i].name}: ${error.error}`);
+                    }
+                    
+                    // Small delay between downloads
+                    await new Promise(resolve => setTimeout(resolve, 500));
                 }
+                
+                document.getElementById('batchFiles').value = '';
+                const dropText = batchDropZone.querySelector('.drop-text');
+                const dropSubtext = batchDropZone.querySelector('.drop-subtext');
+                dropText.textContent = 'Drop multiple files here';
+                dropSubtext.textContent = 'or click to select files';
+                
             } catch (error) {
                 document.getElementById('batchError').textContent = 'Batch conversion failed. Please try again.';
             }
