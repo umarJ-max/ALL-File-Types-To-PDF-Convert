@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Converter Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Files</title>
     <style>
         :root {
             --primary: #6366f1;
@@ -375,23 +373,13 @@
     </div>
     
     <div class="container">
-        <div class="header">
-            <div class="logo">
-                <div class="logo-icon">
-                    <i class="fas fa-file-pdf"></i>
-                </div>
-            </div>
-            <h1>PDF Converter Pro</h1>
-            <p class="subtitle">Transform any file into beautiful PDFs instantly</p>
-        </div>
+        <h1>Files</h1>
         
-        <div class="main-content">
-            <div class="glass-card">
-                <div class="card-header">
-                    <div class="card-icon">
-                        <i class="fas fa-file-upload"></i>
-                    </div>
-                    <h2 class="card-title">Single File</h2>
+        <div class="section">
+            <h2>Single File Conversion</h2>
+            <form id="singleForm" enctype="multipart/form-data">
+                <div class="file-input">
+                    <input type="file" id="singleFile" name="file" accept=".png,.jpg,.jpeg,.bmp,.tiff,.gif,.txt,.md,.docx,.xlsx,.xls">
                 </div>
                 
                 <form id="singleForm" enctype="multipart/form-data">
