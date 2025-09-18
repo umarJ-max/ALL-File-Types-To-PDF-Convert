@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File to PDF Converter</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; margin-bottom: 30px; }
+        .section { margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .section h2 { color: #555; margin-bottom: 15px; }
+        .file-input { margin: 10px 0; }
+        input[type="file"] { padding: 10px; border: 1px solid #ddd; border-radius: 4px; width: 100%; }
+        button { background: #007bff; color: white; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .formats { background: #f8f9fa; padding: 15px; border-radius: 4px; margin-top: 20px; }
+        .formats h3 { color: #333; margin-bottom: 10px; }
+        .formats ul { list-style-type: none; }
+        .formats li { padding: 2px 0; }
+        .loading { display: none; text-align: center; margin: 10px 0; }
+        .error { color: #dc3545; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>File to PDF Converter</h1>
+        
+        <div class="section">
+            <h2>Single File Conversion</h2>
+            <form id="singleForm" enctype="multipart/form-data">
+                <div class="file-input">
+                    <input type="file" id="singleFile" name="file" accept=".png,.jpg,.jpeg,.bmp,.tiff,.gif,.txt,.md,.docx,.xlsx,.xls">
+                </div>
+                <button type="submit">Convert to PDF</button>
+                <div class="loading" id="singleLoading">Converting...</div>
+                <div class="error" id="singleError"></div>
+            </form>
+        </div>
+        
+        <div class="section">
+            <h2>Batch Conversion</h2>
+            <form id="batchForm" enctype="multipart/form-data">
+                <div class="file-input">
+                    <input type="file" id="batchFiles" name="files" multiple accept=".png,.jpg,.jpeg,.bmp,.tiff,.gif,.txt,.md,.docx,.xlsx,.xls">
+                </div>
+                <button type="submit">Convert All to PDF</button>
+                <div class="loading" id="batchLoading">Converting files...</div>
+                <div class="error" id="batchError"></div>
+            </form>
+        </div>
+        
+        <div class="formats">
+            <h3>Supported Formats</h3>
+            <ul>
+                <li><strong>Images:</strong> PNG, JPG, JPEG, BMP, TIFF, GIF</li>
+                <li><strong>Text:</strong> TXT, MD</li>
+                <li><strong>Word:</strong> DOCX</li>
+                <li><strong>Excel:</strong> XLSX, XLS</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('singleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            const file = document.getElementById('singleFile').files[0];
+            
+            if (!file) {
+                document.getElementById('singleError').textContent = 'Please select a file';
+                return;
+            }
+            
+            formData.append('file', file);
+            
+            document.getElementById('singleLoading').style.display = 'block';
+            document.getElementById('singleError').textContent = '';
+            
+            try {
+                const response = await fetch('/convert', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = file.name.replace(/\.[^/.]+$/, '') + '.pdf';
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    const error = await response.json();
+                    document.getElementById('singleError').textContent = error.error;
+                }
+            } catch (error) {
+                document.getElementById('singleError').textContent = 'Conversion failed';
+            }
+            
+            document.getElementById('singleLoading').style.display = 'none';
+        });
+        
+        document.getElementById('batchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            const files = document.getElementById('batchFiles').files;
+            
+            if (files.length === 0) {
+                document.getElementById('batchError').textContent = 'Please select files';
+                return;
+            }
+            
+            for (let file of files) {
+                formData.append('files', file);
+            }
+            
+            document.getElementById('batchLoading').style.display = 'block';
+            document.getElementById('batchError').textContent = '';
+            
+            try {
+                const response = await fetch('/batch-convert', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'converted_files.zip';
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    const error = await response.json();
+                    document.getElementById('batchError').textContent = error.error;
+                }
+            } catch (error) {
+                document.getElementById('batchError').textContent = 'Batch conversion failed';
+            }
+            
+            document.getElementById('batchLoading').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
