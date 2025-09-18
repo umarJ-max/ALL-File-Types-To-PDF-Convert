@@ -38,7 +38,16 @@ def convert_file():
             
             converter.convert_to_pdf(input_path, output_path)
             
-            return send_file(output_path, as_attachment=True, download_name=output_filename)
+            # Read the file content before temp directory is deleted
+            with open(output_path, 'rb') as f:
+                pdf_data = f.read()
+            
+            # Create a temporary file that won't be deleted immediately
+            temp_pdf = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
+            temp_pdf.write(pdf_data)
+            temp_pdf.close()
+            
+            return send_file(temp_pdf.name, as_attachment=True, download_name=output_filename)
             
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -80,7 +89,16 @@ def batch_convert():
                 for file_path, filename in converted_files:
                     zip_file.write(file_path, filename)
             
-            return send_file(zip_path, as_attachment=True, download_name='converted_files.zip')
+            # Read ZIP content before temp directory is deleted
+            with open(zip_path, 'rb') as f:
+                zip_data = f.read()
+            
+            # Create a temporary file that won't be deleted immediately
+            temp_zip = tempfile.NamedTemporaryFile(delete=False, suffix='.zip')
+            temp_zip.write(zip_data)
+            temp_zip.close()
+            
+            return send_file(temp_zip.name, as_attachment=True, download_name='converted_files.zip')
             
     except Exception as e:
         return jsonify({'error': str(e)}), 500
