@@ -75,12 +75,12 @@
         }
         
         .main-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 30px;
             margin-bottom: 40px;
-            max-width: 500px;
+            justify-content: center;
+            max-width: 800px;
             margin: 0 auto 40px auto;
         }
         
@@ -230,7 +230,7 @@
         }
         
         .formats-card {
-            width: 100%;
+            grid-column: 1 / -1;
             background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(6, 182, 212, 0.1));
             border: 1px solid rgba(16, 185, 129, 0.2);
         }
@@ -383,19 +383,19 @@
             <div class="glass-card">
                 <div class="card-header">
                     <div class="card-icon">
-                        <i class="fas fa-files"></i>
+                        <i class="fas fa-file-upload"></i>
                     </div>
-                    <h2 class="card-title">Convert Files</h2>
+                    <h2 class="card-title">Single File</h2>
                 </div>
                 
-                <form id="batchForm" enctype="multipart/form-data">
-                    <div class="file-drop-zone">
+                <form id="singleForm" enctype="multipart/form-data">
+                    <div class="file-drop-zone" onclick="document.getElementById('singleFile').click()">
                         <div class="drop-icon">
                             <i class="fas fa-cloud-upload-alt"></i>
                         </div>
-                        <div class="drop-text">Drop your files here</div>
+                        <div class="drop-text">Drop your file here</div>
                         <div class="drop-subtext">or click to browse</div>
-                        <input type="file" id="batchFiles" name="files" multiple accept=".png,.jpg,.jpeg,.bmp,.tiff,.gif,.txt,.md,.docx,.xlsx,.xls">
+                        <input type="file" id="singleFile" name="file" accept=".png,.jpg,.jpeg,.bmp,.tiff,.gif,.txt,.md,.docx,.xlsx,.xls">
                     </div>
                     
                     <button type="submit" class="btn">
@@ -403,9 +403,40 @@
                         Convert to PDF
                     </button>
                     
+                    <div class="loading" id="singleLoading">
+                        <div class="loading-spinner"></div>
+                        Converting your file...
+                    </div>
+                    <div class="error" id="singleError"></div>
+                </form>
+            </div>
+            
+            <div class="glass-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <h2 class="card-title">Batch Convert</h2>
+                </div>
+                
+                <form id="batchForm" enctype="multipart/form-data">
+                    <div class="file-drop-zone" onclick="document.getElementById('batchFiles').click()">
+                        <div class="drop-icon">
+                            <i class="fas fa-files"></i>
+                        </div>
+                        <div class="drop-text">Drop multiple files here</div>
+                        <div class="drop-subtext">Each file will download as separate PDF</div>
+                        <input type="file" id="batchFiles" name="files" multiple accept=".png,.jpg,.jpeg,.bmp,.tiff,.gif,.txt,.md,.docx,.xlsx,.xls">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-secondary">
+                        <i class="fas fa-bolt"></i>
+                        Convert All Files
+                    </button>
+                    
                     <div class="loading" id="batchLoading">
                         <div class="loading-spinner"></div>
-                        Converting your files...
+                        Processing your files...
                     </div>
                     <div class="error" id="batchError"></div>
                 </form>
@@ -492,13 +523,66 @@
             }
         }
         
+        const singleDropZone = document.querySelector('#singleForm .file-drop-zone');
         const batchDropZone = document.querySelector('#batchForm .file-drop-zone');
+        const singleFileInput = document.getElementById('singleFile');
         const batchFileInput = document.getElementById('batchFiles');
         
+        setupDragAndDrop(singleDropZone, singleFileInput);
         setupDragAndDrop(batchDropZone, batchFileInput);
+        
+        singleFileInput.addEventListener('change', (e) => {
+            updateDropZoneText(singleDropZone, e.target.files);
+        });
         
         batchFileInput.addEventListener('change', (e) => {
             updateDropZoneText(batchDropZone, e.target.files);
+        });
+        
+        document.getElementById('singleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            const file = document.getElementById('singleFile').files[0];
+            
+            if (!file) {
+                document.getElementById('singleError').textContent = 'Please select a file to convert';
+                return;
+            }
+            
+            formData.append('file', file);
+            
+            document.getElementById('singleLoading').style.display = 'block';
+            document.getElementById('singleError').textContent = '';
+            
+            try {
+                const response = await fetch('/convert', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = file.name.replace(/\.[^/.]+$/, '') + '.pdf';
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    
+                    document.getElementById('singleFile').value = '';
+                    const dropText = singleDropZone.querySelector('.drop-text');
+                    const dropSubtext = singleDropZone.querySelector('.drop-subtext');
+                    dropText.textContent = 'Drop your file here';
+                    dropSubtext.textContent = 'or click to browse';
+                } else {
+                    const error = await response.json();
+                    document.getElementById('singleError').textContent = error.error;
+                }
+            } catch (error) {
+                document.getElementById('singleError').textContent = 'Conversion failed. Please try again.';
+            }
+            
+            document.getElementById('singleLoading').style.display = 'none';
         });
         
         document.getElementById('batchForm').addEventListener('submit', async (e) => {
@@ -543,8 +627,8 @@
                 document.getElementById('batchFiles').value = '';
                 const dropText = batchDropZone.querySelector('.drop-text');
                 const dropSubtext = batchDropZone.querySelector('.drop-subtext');
-                dropText.textContent = 'Drop your files here';
-                dropSubtext.textContent = 'Select single or multiple files';
+                dropText.textContent = 'Drop multiple files here';
+                dropSubtext.textContent = 'or click to select files';
                 
             } catch (error) {
                 document.getElementById('batchError').textContent = 'Batch conversion failed. Please try again.';
