@@ -389,13 +389,13 @@
                 </div>
                 
                 <form id="singleForm" enctype="multipart/form-data">
-                    <div class="file-drop-zone" onclick="document.getElementById('singleFile').click()">
+                    <div class="file-drop-zone">
                         <div class="drop-icon">
                             <i class="fas fa-cloud-upload-alt"></i>
                         </div>
                         <div class="drop-text">Drop your file here</div>
                         <div class="drop-subtext">or click to browse</div>
-                        <input type="file" id="singleFile" name="file" accept=".png,.jpg,.jpeg,.bmp,.tiff,.gif,.txt,.md,.docx,.xlsx,.xls">
+                        <input type="file" id="singleFile" name="file">
                     </div>
                     
                     <button type="submit" class="btn">
@@ -420,13 +420,13 @@
                 </div>
                 
                 <form id="batchForm" enctype="multipart/form-data">
-                    <div class="file-drop-zone" onclick="document.getElementById('batchFiles').click()">
+                    <div class="file-drop-zone">
                         <div class="drop-icon">
                             <i class="fas fa-files"></i>
                         </div>
                         <div class="drop-text">Drop multiple files here</div>
                         <div class="drop-subtext">or click to select files</div>
-                        <input type="file" id="batchFiles" name="files" multiple accept=".png,.jpg,.jpeg,.bmp,.tiff,.gif,.txt,.md,.docx,.xlsx,.xls">
+                        <input type="file" id="batchFiles" name="files" multiple>
                     </div>
                     
                     <button type="submit" class="btn btn-secondary">
@@ -464,15 +464,15 @@
                             <i class="fas fa-file-alt"></i>
                             Documents
                         </div>
-                        <div class="format-list">TXT, MD, DOCX</div>
+                        <div class="format-list">TXT, MD, DOCX, PDF, RTF</div>
                     </div>
                     
                     <div class="format-item">
                         <div class="format-title">
                             <i class="fas fa-table"></i>
-                            Spreadsheets
+                            All Files
                         </div>
-                        <div class="format-list">XLSX, XLS</div>
+                        <div class="format-list">Any file type supported</div>
                     </div>
                 </div>
             </div>
