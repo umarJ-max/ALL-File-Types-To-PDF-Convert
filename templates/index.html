@@ -389,7 +389,7 @@
                 </div>
                 
                 <form id="singleForm" enctype="multipart/form-data">
-                    <div class="file-drop-zone">
+                    <div class="file-drop-zone" onclick="document.getElementById('singleFile').click()">
                         <div class="drop-icon">
                             <i class="fas fa-cloud-upload-alt"></i>
                         </div>
@@ -420,7 +420,7 @@
                 </div>
                 
                 <form id="batchForm" enctype="multipart/form-data">
-                    <div class="file-drop-zone">
+                    <div class="file-drop-zone" onclick="document.getElementById('batchFiles').click()">
                         <div class="drop-icon">
                             <i class="fas fa-files"></i>
                         </div>
@@ -464,7 +464,7 @@
                             <i class="fas fa-file-alt"></i>
                             Documents
                         </div>
-                        <div class="format-list">TXT, MD, DOCX, PDF, RTF</div>
+                        <div class="format-list">TXT, MD, DOCX</div>
                     </div>
                     
                     <div class="format-item">
@@ -472,7 +472,7 @@
                             <i class="fas fa-table"></i>
                             All Files
                         </div>
-                        <div class="format-list">Any file type supported</div>
+                        <div class="format-list">Any file type accepted</div>
                     </div>
                 </div>
             </div>
