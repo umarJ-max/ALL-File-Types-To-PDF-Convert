@@ -425,7 +425,7 @@
                             <i class="fas fa-files"></i>
                         </div>
                         <div class="drop-text">Drop multiple files here</div>
-                        <div class="drop-subtext">Each file will download as separate PDF</div>
+                        <div class="drop-subtext">or click to select files</div>
                         <input type="file" id="batchFiles" name="files" multiple accept=".png,.jpg,.jpeg,.bmp,.tiff,.gif,.txt,.md,.docx,.xlsx,.xls">
                     </div>
                     
@@ -617,10 +617,9 @@
                         window.URL.revokeObjectURL(url);
                     } else {
                         const error = await response.json();
-                        console.error(`Error converting ${files[i].name}: ${error.error}`);
+                        document.getElementById('batchError').textContent = error.error;
                     }
                     
-                    // Small delay between downloads
                     await new Promise(resolve => setTimeout(resolve, 500));
                 }
                 
@@ -628,7 +627,7 @@
                 const dropText = batchDropZone.querySelector('.drop-text');
                 const dropSubtext = batchDropZone.querySelector('.drop-subtext');
                 dropText.textContent = 'Drop multiple files here';
-                dropSubtext.textContent = 'or click to select files';
+                dropSubtext.textContent = 'Each file will download as separate PDF';
                 
             } catch (error) {
                 document.getElementById('batchError').textContent = 'Batch conversion failed. Please try again.';
