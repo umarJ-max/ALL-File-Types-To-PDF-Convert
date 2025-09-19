@@ -398,7 +398,7 @@
                         <input type="file" id="singleFile" name="file">
                     </div>
                     
-                    <button type="submit" class="btn">
+                    <button type="submit" class="btn" onclick="event.stopPropagation()">
                         <i class="fas fa-magic"></i>
                         Convert to PDF
                     </button>
@@ -429,7 +429,7 @@
                         <input type="file" id="batchFiles" name="files" multiple>
                     </div>
                     
-                    <button type="submit" class="btn btn-secondary">
+                    <button type="submit" class="btn btn-secondary" onclick="event.stopPropagation()">
                         <i class="fas fa-bolt"></i>
                         Convert All Files
                     </button>
