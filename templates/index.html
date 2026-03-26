@@ -3,638 +3,767 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Converter Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>PDF Forge — File Converter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #6366f1;
-            --secondary: #ec4899;
-            --accent: #06b6d4;
-            --success: #10b981;
-            --error: #ef4444;
-            --glass: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.2);
+            --ink: #0a0a0f;
+            --paper: #f5f0e8;
+            --cream: #ede8dc;
+            --rust: #c9440e;
+            --rust-dark: #9e3309;
+            --rust-light: #e8602a;
+            --gold: #d4a017;
+            --sage: #4a7c59;
+            --slate: #2d3748;
+            --mist: #8a8a96;
+            --border: rgba(10,10,15,0.12);
+            --shadow-sm: 0 2px 8px rgba(10,10,15,0.08);
+            --shadow-md: 0 8px 32px rgba(10,10,15,0.12);
+            --shadow-lg: 0 20px 60px rgba(10,10,15,0.16);
         }
-        
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body { 
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Syne', sans-serif;
+            background: var(--paper);
+            color: var(--ink);
             min-height: 100vh;
             overflow-x: hidden;
         }
-        
-        .header {
-            text-align: center;
-            padding: 60px 20px 40px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--glass-border);
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.6;
         }
-        
-        .logo {
-            display: inline-flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .logo-icon {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 12px;
+
+        /* HEADER */
+        header {
+            padding: 28px 60px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            color: white;
-            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+            justify-content: space-between;
+            border-bottom: 1.5px solid var(--border);
+            background: var(--paper);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        
-        h1 { 
-            color: white;
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+
+        .brand { display: flex; align-items: center; gap: 14px; }
+
+        .brand-mark {
+            width: 40px; height: 40px;
+            background: var(--ink);
+            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            position: relative; overflow: hidden;
         }
-        
-        .subtitle {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 1.1rem;
-            font-weight: 400;
+
+        .brand-mark::after {
+            content: '';
+            position: absolute; bottom: 0; right: 0;
+            width: 0; height: 0;
+            border-style: solid;
+            border-width: 0 0 12px 12px;
+            border-color: transparent transparent var(--rust) transparent;
         }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-        
-        .main-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
-            justify-content: center;
-            max-width: 800px;
-            margin: 0 auto 40px auto;
-        }
-        
-        .glass-card { 
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
+
+        .brand-mark i { color: var(--paper); font-size: 16px; }
+
+        .brand-name { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.02em; }
+        .brand-name span { color: var(--rust); }
+
+        .header-badge {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--mist);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border: 1px solid var(--border);
+            padding: 6px 12px;
             border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
         }
-        
-        .glass-card:hover { 
-            transform: translateY(-5px);
-        }
-        
-        .card-header {
-            display: flex;
+
+        /* HERO */
+        .hero {
+            padding: 80px 60px 60px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
             align-items: center;
-            gap: 15px;
-            margin-bottom: 25px;
+            max-width: 1300px;
+            margin: 0 auto;
         }
-        
-        .card-icon {
-            width: 45px;
-            height: 45px;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            color: white;
+
+        .hero-left h1 {
+            font-size: clamp(2.8rem, 5vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.0;
+            letter-spacing: -0.03em;
+            margin-bottom: 24px;
         }
-        
-        .card-title { 
-            color: white;
-            font-size: 1.3rem;
-            font-weight: 600;
-        }
-        
-        .file-drop-zone {
-            border: 2px dashed rgba(255, 255, 255, 0.3);
-            border-radius: 12px;
-            padding: 30px 20px;
-            text-align: center;
-            background: rgba(255, 255, 255, 0.05);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            margin-bottom: 20px;
-            position: relative;
-        }
-        
-        .file-drop-zone:hover {
-            border-color: rgba(255, 255, 255, 0.5);
-            background: rgba(255, 255, 255, 0.1);
-        }
-        
-        .drop-icon {
-            font-size: 36px;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 12px;
-        }
-        
-        .drop-text {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 1rem;
-            margin-bottom: 8px;
-        }
-        
-        .drop-subtext {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.85rem;
-        }
-        
-        input[type="file"] {
-            position: absolute;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-        }
-        
-        .btn {
-            background: linear-gradient(135deg, var(--primary), #4f46e5);
-            color: white;
-            padding: 14px 28px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 15px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            width: 100%;
-            justify-content: center;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
-        }
-        
-        .btn-secondary {
-            background: linear-gradient(135deg, var(--secondary), #be185d);
-            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.3);
-        }
-        
-        .btn-secondary:hover {
-            box-shadow: 0 8px 25px rgba(236, 72, 153, 0.4);
-        }
-        
-        .loading {
-            display: none;
-            text-align: center;
-            margin: 15px 0;
-            color: rgba(255, 255, 255, 0.9);
+
+        .hero-left h1 .line-accent { color: var(--rust); font-style: italic; }
+
+        .hero-left p {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--mist);
+            max-width: 420px;
+            margin-bottom: 36px;
             font-weight: 500;
         }
-        
-        .loading-spinner {
-            display: inline-block;
-            width: 18px;
-            height: 18px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s linear infinite;
-            margin-right: 8px;
+
+        .stats-row { display: flex; gap: 32px; }
+
+        .stat { display: flex; flex-direction: column; gap: 2px; }
+
+        .stat-num { font-size: 1.8rem; font-weight: 800; color: var(--ink); line-height: 1; }
+
+        .stat-label {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--mist);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
         }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .error {
-            color: var(--error);
-            margin: 12px 0;
-            padding: 12px;
-            background: rgba(239, 68, 68, 0.1);
-            border-radius: 8px;
-            border: 1px solid rgba(239, 68, 68, 0.2);
-        }
-        
-        .formats-card {
-            grid-column: 1 / -1;
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(6, 182, 212, 0.1));
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-        
-        .formats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-        
-        .format-item {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
+
+        /* HERO VISUAL */
+        .hero-visual { position: relative; display: flex; justify-content: center; }
+
+        .doc-stack { position: relative; width: 260px; height: 320px; }
+
+        .doc-card {
+            position: absolute;
+            width: 210px; height: 270px;
             border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1.5px solid var(--border);
+            background: white;
+            box-shadow: var(--shadow-md);
+            display: flex; flex-direction: column;
+            overflow: hidden;
+            transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
         }
-        
-        .format-title {
-            color: white;
-            font-weight: 600;
+
+        .doc-card:nth-child(1) { bottom: 0; left: 0; transform: rotate(-6deg); background: var(--cream); z-index: 1; }
+        .doc-card:nth-child(2) { bottom: 20px; left: 25px; transform: rotate(-2deg); z-index: 2; }
+        .doc-card:nth-child(3) { bottom: 40px; left: 50px; transform: rotate(3deg); background: var(--ink); z-index: 3; }
+
+        .doc-stack:hover .doc-card:nth-child(1) { transform: rotate(-10deg) translateX(-10px); }
+        .doc-stack:hover .doc-card:nth-child(2) { transform: rotate(-4deg); }
+        .doc-stack:hover .doc-card:nth-child(3) { transform: rotate(5deg) translateX(10px); }
+
+        .doc-header-bar {
+            height: 36px; background: var(--rust);
+            display: flex; align-items: center;
+            padding: 0 14px; gap: 8px;
+        }
+
+        .doc-card:nth-child(3) .doc-header-bar { background: var(--rust-light); }
+
+        .doc-dots span { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.4); display: inline-block; margin-right: 4px; }
+
+        .doc-body { padding: 16px; flex: 1; }
+
+        .doc-line { height: 7px; border-radius: 4px; background: var(--border); margin-bottom: 8px; }
+        .doc-card:nth-child(3) .doc-line { background: rgba(255,255,255,0.1); }
+        .doc-line.w-full { width: 100%; }
+        .doc-line.w-3q { width: 75%; }
+        .doc-line.w-half { width: 50%; }
+        .doc-line.w-2q { width: 60%; }
+        .doc-line.accent { background: var(--rust); opacity: 0.3; }
+
+        .arrow-badge {
+            position: absolute; top: 50%; right: -30px;
+            transform: translateY(-50%);
+            width: 56px; height: 56px;
+            background: var(--rust); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 1.2rem;
+            box-shadow: var(--shadow-md);
+            z-index: 10;
+        }
+
+        /* DIVIDER */
+        .section-divider { padding: 0 60px; max-width: 1300px; margin: 0 auto; }
+        .divider-line { border: none; border-top: 1.5px solid var(--border); }
+
+        /* CONVERTER SECTION */
+        .converter-section { padding: 60px; max-width: 1300px; margin: 0 auto; }
+
+        .section-label {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--rust);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
             margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.9rem;
+            display: flex; align-items: center; gap: 8px;
         }
-        
-        .format-list {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.8rem;
-            line-height: 1.4;
+
+        .section-label::before { content: ''; display: inline-block; width: 20px; height: 1.5px; background: var(--rust); }
+
+        .section-title { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 40px; }
+
+        .converter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+        /* CONVERTER CARD */
+        .conv-card {
+            border: 1.5px solid var(--border);
+            border-radius: 16px;
+            padding: 36px;
+            background: white;
+            box-shadow: var(--shadow-sm);
+            position: relative; overflow: hidden;
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
         }
-        
-        footer {
+
+        .conv-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: var(--rust);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .conv-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+        .conv-card:hover::before { transform: scaleX(1); }
+
+        .conv-card-accent { background: var(--ink); border-color: transparent; }
+        .conv-card-accent::before { background: var(--rust-light); }
+
+        .conv-card-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; }
+
+        .conv-tag {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.68rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 5px 10px;
+            border-radius: 4px;
+            background: var(--cream);
+            color: var(--mist);
+        }
+
+        .conv-card-accent .conv-tag { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); }
+
+        .conv-num { font-size: 3rem; font-weight: 800; color: var(--cream); line-height: 1; }
+        .conv-card-accent .conv-num { color: rgba(255,255,255,0.06); }
+
+        .conv-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.01em; }
+        .conv-card-accent .conv-title { color: white; }
+
+        .conv-desc { font-size: 0.88rem; color: var(--mist); line-height: 1.5; margin-bottom: 28px; }
+        .conv-card-accent .conv-desc { color: rgba(255,255,255,0.45); }
+
+        /* DROP ZONE */
+        .drop-zone {
+            border: 1.5px dashed var(--border);
+            border-radius: 12px;
+            padding: 28px 20px;
             text-align: center;
-            padding: 40px 20px;
-            background: rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid var(--glass-border);
-            color: rgba(255, 255, 255, 0.8);
+            background: var(--paper);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            margin-bottom: 20px;
+            position: relative;
+            user-select: none;
         }
-        
-        footer a {
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.3s ease;
+
+        .conv-card-accent .drop-zone { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); }
+        .drop-zone:hover, .drop-zone.dragover { border-color: var(--rust); background: rgba(201,68,14,0.04); }
+        .conv-card-accent .drop-zone:hover, .conv-card-accent .drop-zone.dragover { border-color: var(--rust-light); background: rgba(232,96,42,0.08); }
+
+        .drop-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+
+        .drop-icon-wrap {
+            width: 48px; height: 48px;
+            border-radius: 10px;
+            background: var(--cream);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 12px;
+            font-size: 1.2rem;
+            color: var(--rust);
+            transition: transform 0.3s ease;
         }
-        
-        footer a:hover {
-            color: white;
+
+        .conv-card-accent .drop-icon-wrap { background: rgba(255,255,255,0.08); color: var(--rust-light); }
+        .drop-zone:hover .drop-icon-wrap { transform: translateY(-3px); }
+
+        .drop-primary { font-size: 0.92rem; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+        .conv-card-accent .drop-primary { color: rgba(255,255,255,0.85); }
+
+        .drop-secondary { font-size: 0.78rem; color: var(--mist); font-family: 'DM Mono', monospace; }
+
+        /* FILE PREVIEW */
+        .file-preview { display: none; margin-bottom: 16px; border: 1.5px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--paper); }
+        .conv-card-accent .file-preview { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); }
+        .file-preview.show { display: block; }
+
+        .preview-header {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            font-family: 'DM Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--mist);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            display: flex; justify-content: space-between; align-items: center;
         }
-        
-        .footer-links {
-            margin-top: 15px;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
+
+        .conv-card-accent .preview-header { border-color: rgba(255,255,255,0.08); color: rgba(255,255,255,0.3); }
+
+        .file-list { max-height: 120px; overflow-y: auto; padding: 8px 0; }
+
+        .file-item { padding: 7px 14px; display: flex; align-items: center; gap: 10px; font-size: 0.83rem; }
+        .file-item i { color: var(--rust); font-size: 0.9rem; }
+        .conv-card-accent .file-item { color: rgba(255,255,255,0.7); }
+        .conv-card-accent .file-item i { color: var(--rust-light); }
+
+        .file-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .file-size { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--mist); flex-shrink: 0; }
+        .conv-card-accent .file-size { color: rgba(255,255,255,0.3); }
+
+        /* BUTTONS */
+        .btn-convert {
+            width: 100%;
+            padding: 15px 24px;
+            border: none; border-radius: 10px;
+            font-family: 'Syne', sans-serif;
+            font-size: 0.95rem; font-weight: 700;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: all 0.25s ease;
+            letter-spacing: 0.01em;
         }
-        
-        .footer-links a {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.9rem;
+
+        .btn-convert-primary { background: var(--rust); color: white; box-shadow: 0 4px 16px rgba(201,68,14,0.28); }
+        .btn-convert-primary:hover { background: var(--rust-dark); box-shadow: 0 6px 24px rgba(201,68,14,0.4); transform: translateY(-1px); }
+
+        .btn-convert-white { background: white; color: var(--ink); box-shadow: 0 4px 16px rgba(0,0,0,0.14); }
+        .btn-convert-white:hover { background: var(--paper); box-shadow: 0 6px 24px rgba(0,0,0,0.2); transform: translateY(-1px); }
+
+        .btn-convert:active { transform: translateY(0); }
+        .btn-convert:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+        /* PROGRESS */
+        .progress-wrap { display: none; margin-top: 14px; }
+        .progress-wrap.show { display: block; }
+
+        .progress-label { display: flex; justify-content: space-between; margin-bottom: 8px; }
+
+        .progress-text { font-size: 0.8rem; font-weight: 600; color: var(--ink); }
+        .conv-card-accent .progress-text { color: rgba(255,255,255,0.8); }
+
+        .progress-pct { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--mist); }
+        .conv-card-accent .progress-pct { color: rgba(255,255,255,0.4); }
+
+        .progress-bar-track { height: 5px; border-radius: 10px; background: var(--cream); overflow: hidden; }
+        .conv-card-accent .progress-bar-track { background: rgba(255,255,255,0.1); }
+        .progress-bar-fill { height: 100%; border-radius: 10px; background: var(--rust); width: 0%; transition: width 0.4s ease; }
+
+        /* MESSAGE */
+        .msg-box { margin-top: 12px; padding: 11px 14px; border-radius: 8px; font-size: 0.82rem; display: none; font-weight: 500; }
+        .msg-box.show { display: flex; align-items: center; gap: 8px; }
+        .msg-error { background: rgba(239,68,68,0.08); color: #dc2626; border: 1px solid rgba(239,68,68,0.2); }
+        .msg-success { background: rgba(74,124,89,0.08); color: var(--sage); border: 1px solid rgba(74,124,89,0.2); }
+
+        /* FORMATS SECTION */
+        .formats-section { padding: 60px; max-width: 1300px; margin: 0 auto; padding-top: 0; }
+
+        .formats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+        .format-card { border: 1.5px solid var(--border); border-radius: 12px; padding: 20px; background: white; transition: all 0.25s ease; }
+        .format-card:hover { border-color: var(--rust); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+
+        .format-icon { font-size: 1.5rem; margin-bottom: 10px; }
+        .format-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 6px; letter-spacing: -0.01em; }
+        .format-exts { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--mist); line-height: 1.5; }
+
+        /* FOOTER */
+        footer {
+            border-top: 1.5px solid var(--border);
+            padding: 28px 60px;
+            display: flex; align-items: center; justify-content: space-between;
         }
-        
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .header {
-                padding: 40px 15px 30px;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .subtitle {
-                font-size: 1rem;
-            }
-            
-            .container {
-                padding: 20px 15px;
-            }
-            
-            .main-content {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
-            .glass-card {
-                padding: 20px;
-            }
-            
-            .file-drop-zone {
-                padding: 20px 15px;
-            }
-            
-            .drop-icon {
-                font-size: 28px;
-            }
-            
-            .formats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .footer-links {
-                flex-direction: column;
-                gap: 10px;
-            }
+
+        .footer-copy { font-size: 0.85rem; color: var(--mist); font-weight: 500; }
+        .footer-copy strong { color: var(--ink); }
+        .footer-mono { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--mist); letter-spacing: 0.06em; }
+
+        /* ANIMATIONS */
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spin { animation: spin 0.8s linear infinite; }
+
+        .hero-left { animation: fadeUp 0.6s ease both; }
+        .hero-visual { animation: fadeUp 0.6s 0.15s ease both; animation-fill-mode: both; opacity: 0; }
+        .conv-card:nth-child(1) { animation: fadeUp 0.5s 0.1s ease both; animation-fill-mode: both; opacity: 0; }
+        .conv-card:nth-child(2) { animation: fadeUp 0.5s 0.2s ease both; animation-fill-mode: both; opacity: 0; }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            header { padding: 22px 28px; }
+            .hero { grid-template-columns: 1fr; padding: 48px 28px 40px; gap: 0; }
+            .hero-visual { display: none; }
+            .converter-section { padding: 40px 28px; }
+            .converter-grid { grid-template-columns: 1fr; }
+            .formats-section { padding: 0 28px 60px; }
+            .formats-grid { grid-template-columns: repeat(2, 1fr); }
+            footer { padding: 24px 28px; flex-direction: column; gap: 8px; text-align: center; }
+            .section-divider { padding: 0 28px; }
         }
-        
-        @media (max-width: 480px) {
-            .header {
-                padding: 30px 10px 20px;
-            }
-            
-            h1 {
-                font-size: 1.8rem;
-            }
-            
-            .container {
-                padding: 15px 10px;
-            }
-            
-            .glass-card {
-                padding: 15px;
-            }
-            
-            .btn {
-                padding: 12px 20px;
-                font-size: 14px;
-            }
+
+        @media (max-width: 520px) {
+            header { padding: 18px; }
+            .hero { padding: 32px 18px 28px; }
+            .hero-left h1 { font-size: 2.2rem; }
+            .converter-section { padding: 28px 18px; }
+            .conv-card { padding: 22px 18px; }
+            .formats-section { padding: 0 18px 48px; }
+            .formats-grid { grid-template-columns: 1fr 1fr; }
+            footer { padding: 20px 18px; }
+            .section-divider { padding: 0 18px; }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo">
-            <div class="logo-icon">
-                <i class="fas fa-file-pdf"></i>
+
+    <header>
+        <div class="brand">
+            <div class="brand-mark"><i class="fas fa-file-pdf"></i></div>
+            <div class="brand-name">PDF<span>Forge</span></div>
+        </div>
+        <div class="header-badge">v2.0 · By Umar J</div>
+    </header>
+
+    <section class="hero">
+        <div class="hero-left">
+            <h1>Any File.<br><span class="line-accent">Any Format.</span><br>Pure PDF.</h1>
+            <p>Upload documents, images, or any file and get a clean, perfectly rendered PDF in seconds. Single files or entire batches — we handle it all.</p>
+            <div class="stats-row">
+                <div class="stat"><span class="stat-num">15+</span><span class="stat-label">Formats</span></div>
+                <div class="stat"><span class="stat-num">16MB</span><span class="stat-label">Max size</span></div>
+                <div class="stat"><span class="stat-num">∞</span><span class="stat-label">Free forever</span></div>
             </div>
         </div>
-        <h1>PDF Converter Pro</h1>
-        <p class="subtitle">Transform any file into beautiful PDFs instantly</p>
-    </div>
-    
-    <div class="container">
-        <div class="main-content">
-            <div class="glass-card">
-                <div class="card-header">
-                    <div class="card-icon">
-                        <i class="fas fa-file-upload"></i>
-                    </div>
-                    <h2 class="card-title">Single File</h2>
-                </div>
-                
-                <form id="singleForm" enctype="multipart/form-data">
-                    <div class="file-drop-zone" onclick="document.getElementById('singleFile').click()">
-                        <div class="drop-icon">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                        </div>
-                        <div class="drop-text">Drop your file here</div>
-                        <div class="drop-subtext">or click to browse</div>
-                        <input type="file" id="singleFile" name="file">
-                    </div>
-                    
-                    <button type="submit" class="btn" onclick="event.stopPropagation()">
-                        <i class="fas fa-magic"></i>
-                        Convert to PDF
-                    </button>
-                    
-                    <div class="loading" id="singleLoading">
-                        <div class="loading-spinner"></div>
-                        Converting your file...
-                    </div>
-                    <div class="error" id="singleError"></div>
-                </form>
-            </div>
-            
-            <div class="glass-card">
-                <div class="card-header">
-                    <div class="card-icon">
-                        <i class="fas fa-layer-group"></i>
-                    </div>
-                    <h2 class="card-title">Batch Convert</h2>
-                </div>
-                
-                <form id="batchForm" enctype="multipart/form-data">
-                    <div class="file-drop-zone" onclick="document.getElementById('batchFiles').click()">
-                        <div class="drop-icon">
-                            <i class="fas fa-files"></i>
-                        </div>
-                        <div class="drop-text">Drop multiple files here</div>
-                        <div class="drop-subtext">or click to select files</div>
-                        <input type="file" id="batchFiles" name="files" multiple>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-secondary" onclick="event.stopPropagation()">
-                        <i class="fas fa-bolt"></i>
-                        Convert All Files
-                    </button>
-                    
-                    <div class="loading" id="batchLoading">
-                        <div class="loading-spinner"></div>
-                        Processing your files...
-                    </div>
-                    <div class="error" id="batchError"></div>
-                </form>
-            </div>
-            
-            <div class="glass-card formats-card">
-                <div class="card-header">
-                    <div class="card-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <h2 class="card-title">Supported Formats</h2>
-                </div>
-                
-                <div class="formats-grid">
-                    <div class="format-item">
-                        <div class="format-title">
-                            <i class="fas fa-image"></i>
-                            Images
-                        </div>
-                        <div class="format-list">PNG, JPG, JPEG, BMP, TIFF, GIF</div>
-                    </div>
-                    
-                    <div class="format-item">
-                        <div class="format-title">
-                            <i class="fas fa-file-alt"></i>
-                            Documents
-                        </div>
-                        <div class="format-list">TXT, MD, DOCX</div>
-                    </div>
-                    
-                    <div class="format-item">
-                        <div class="format-title">
-                            <i class="fas fa-table"></i>
-                            All Files
-                        </div>
-                        <div class="format-list">Any file type accepted</div>
+        <div class="hero-visual">
+            <div class="doc-stack">
+                <div class="doc-card">
+                    <div class="doc-header-bar"><div class="doc-dots"><span></span><span></span><span></span></div></div>
+                    <div class="doc-body">
+                        <div class="doc-line w-full"></div><div class="doc-line w-3q"></div>
+                        <div class="doc-line w-half accent"></div><div class="doc-line w-full"></div><div class="doc-line w-2q"></div>
                     </div>
                 </div>
+                <div class="doc-card">
+                    <div class="doc-header-bar"><div class="doc-dots"><span></span><span></span><span></span></div></div>
+                    <div class="doc-body">
+                        <div class="doc-line w-full"></div><div class="doc-line w-3q accent"></div>
+                        <div class="doc-line w-full"></div><div class="doc-line w-half"></div><div class="doc-line w-2q"></div>
+                    </div>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-header-bar"><div class="doc-dots"><span></span><span></span><span></span></div></div>
+                    <div class="doc-body">
+                        <div class="doc-line w-full"></div><div class="doc-line w-3q"></div>
+                        <div class="doc-line w-half"></div><div class="doc-line w-2q"></div><div class="doc-line w-full accent"></div>
+                    </div>
+                </div>
+                <div class="arrow-badge"><i class="fas fa-arrow-right"></i></div>
             </div>
         </div>
-    </div>
-    
+    </section>
+
+    <div class="section-divider"><hr class="divider-line"></div>
+
+    <section class="converter-section">
+        <div class="section-label">Convert</div>
+        <h2 class="section-title">Choose Your Method</h2>
+
+        <div class="converter-grid">
+
+            <!-- SINGLE FILE -->
+            <div class="conv-card">
+                <div class="conv-card-head">
+                    <div class="conv-tag">Single File</div>
+                    <div class="conv-num">01</div>
+                </div>
+                <div class="conv-title">Quick Convert</div>
+                <div class="conv-desc">Drop one file and get your PDF instantly. Perfect for single documents, images, or any individual file.</div>
+
+                <div class="drop-zone" id="singleDrop">
+                    <input type="file" id="singleFile" accept="*/*">
+                    <div class="drop-icon-wrap"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="drop-primary">Drop your file here</div>
+                    <div class="drop-secondary">or click to browse</div>
+                </div>
+
+                <div class="file-preview" id="singlePreview">
+                    <div class="preview-header"><span>Selected File</span><span id="singleCount">—</span></div>
+                    <div class="file-list" id="singleList"></div>
+                </div>
+
+                <button class="btn-convert btn-convert-primary" id="singleBtn" onclick="handleSingleConvert()">
+                    <i class="fas fa-magic"></i> Convert to PDF
+                </button>
+
+                <div class="progress-wrap" id="singleProgress">
+                    <div class="progress-label">
+                        <span class="progress-text" id="singleProgressText">Converting...</span>
+                        <span class="progress-pct" id="singlePct">0%</span>
+                    </div>
+                    <div class="progress-bar-track"><div class="progress-bar-fill" id="singleBar"></div></div>
+                </div>
+
+                <div class="msg-box" id="singleMsg"></div>
+            </div>
+
+            <!-- BATCH -->
+            <div class="conv-card conv-card-accent">
+                <div class="conv-card-head">
+                    <div class="conv-tag">Batch Mode</div>
+                    <div class="conv-num">02</div>
+                </div>
+                <div class="conv-title">Bulk Convert</div>
+                <div class="conv-desc">Select multiple files at once. Each is converted and packaged into a ZIP archive ready to download.</div>
+
+                <div class="drop-zone" id="batchDrop">
+                    <input type="file" id="batchFiles" accept="*/*" multiple>
+                    <div class="drop-icon-wrap"><i class="fas fa-layer-group"></i></div>
+                    <div class="drop-primary">Drop multiple files here</div>
+                    <div class="drop-secondary">or click to select files</div>
+                </div>
+
+                <div class="file-preview" id="batchPreview">
+                    <div class="preview-header"><span>Selected Files</span><span id="batchCount">—</span></div>
+                    <div class="file-list" id="batchList"></div>
+                </div>
+
+                <button class="btn-convert btn-convert-white" id="batchBtn" onclick="handleBatchConvert()">
+                    <i class="fas fa-bolt"></i> Convert All & Download ZIP
+                </button>
+
+                <div class="progress-wrap" id="batchProgress">
+                    <div class="progress-label">
+                        <span class="progress-text" id="batchProgressText">Processing...</span>
+                        <span class="progress-pct" id="batchPct">0%</span>
+                    </div>
+                    <div class="progress-bar-track"><div class="progress-bar-fill" id="batchBar"></div></div>
+                </div>
+
+                <div class="msg-box" id="batchMsg"></div>
+            </div>
+
+        </div>
+    </section>
+
+    <div class="section-divider"><hr class="divider-line"></div>
+
+    <section class="formats-section" style="padding-top: 60px;">
+        <div class="section-label">Supported</div>
+        <h2 class="section-title">File Formats</h2>
+        <div class="formats-grid">
+            <div class="format-card">
+                <div class="format-icon">🖼️</div>
+                <div class="format-name">Images</div>
+                <div class="format-exts">PNG · JPG · JPEG<br>BMP · TIFF · GIF</div>
+            </div>
+            <div class="format-card">
+                <div class="format-icon">📄</div>
+                <div class="format-name">Documents</div>
+                <div class="format-exts">TXT · MD<br>DOCX</div>
+            </div>
+            <div class="format-card">
+                <div class="format-icon">📊</div>
+                <div class="format-name">Data Files</div>
+                <div class="format-exts">CSV · JSON<br>XML</div>
+            </div>
+            <div class="format-card">
+                <div class="format-icon">📦</div>
+                <div class="format-name">Everything Else</div>
+                <div class="format-exts">Any file type<br>accepted</div>
+            </div>
+        </div>
+    </section>
+
     <footer>
-        <p>&copy; 2025 PDF Converter Pro. All rights reserved. | Developed by Umar J</p>
+        <div class="footer-copy">© 2025 <strong>PDFForge</strong> · Developed by Umar J</div>
+        <div class="footer-mono">Built with Flask · Hosted on Vercel</div>
     </footer>
 
     <script>
-        function setupDragAndDrop(dropZone, fileInput) {
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                dropZone.addEventListener(eventName, e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }, false);
+        function formatBytes(b) {
+            if (b < 1024) return b + ' B';
+            if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+            return (b/1048576).toFixed(1) + ' MB';
+        }
+
+        function getFileIcon(name) {
+            const ext = name.split('.').pop().toLowerCase();
+            const icons = { pdf:'fa-file-pdf', doc:'fa-file-word', docx:'fa-file-word', xls:'fa-file-excel', xlsx:'fa-file-excel', png:'fa-file-image', jpg:'fa-file-image', jpeg:'fa-file-image', gif:'fa-file-image', bmp:'fa-file-image', tiff:'fa-file-image', txt:'fa-file-alt', md:'fa-file-alt', csv:'fa-file-csv', json:'fa-file-code', xml:'fa-file-code' };
+            return 'fas ' + (icons[ext] || 'fa-file');
+        }
+
+        function showMsg(id, text, type) {
+            const el = document.getElementById(id);
+            el.className = 'msg-box show msg-' + type;
+            el.innerHTML = `<i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i> ${text}`;
+        }
+
+        function hideMsg(id) { document.getElementById(id).className = 'msg-box'; }
+
+        function setProgress(prefix, pct, text) {
+            document.getElementById(prefix + 'Progress').classList.add('show');
+            document.getElementById(prefix + 'Bar').style.width = pct + '%';
+            document.getElementById(prefix + 'Pct').textContent = pct + '%';
+            if (text) document.getElementById(prefix + 'ProgressText').textContent = text;
+        }
+
+        function hideProgress(prefix) { document.getElementById(prefix + 'Progress').classList.remove('show'); }
+
+        function setBtn(id, loading, text, icon) {
+            const btn = document.getElementById(id);
+            btn.disabled = loading;
+            btn.innerHTML = loading ? `<i class="fas fa-circle-notch spin"></i> ${text}` : `<i class="${icon}"></i> ${text}`;
+        }
+
+        function renderPreview(files, listId, previewId, countId) {
+            const list = document.getElementById(listId);
+            const preview = document.getElementById(previewId);
+            const count = document.getElementById(countId);
+            if (!files || files.length === 0) { preview.classList.remove('show'); return; }
+            list.innerHTML = '';
+            Array.from(files).forEach(f => {
+                const div = document.createElement('div');
+                div.className = 'file-item';
+                div.innerHTML = `<i class="${getFileIcon(f.name)}"></i><span class="file-name">${f.name}</span><span class="file-size">${formatBytes(f.size)}</span>`;
+                list.appendChild(div);
             });
-            
-            ['dragenter', 'dragover'].forEach(eventName => {
-                dropZone.addEventListener(eventName, () => {
-                    dropZone.style.borderColor = 'rgba(6, 182, 212, 0.8)';
-                    dropZone.style.background = 'rgba(6, 182, 212, 0.1)';
-                }, false);
-            });
-            
-            ['dragleave', 'drop'].forEach(eventName => {
-                dropZone.addEventListener(eventName, () => {
-                    dropZone.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                    dropZone.style.background = 'rgba(255, 255, 255, 0.05)';
-                }, false);
-            });
-            
-            dropZone.addEventListener('drop', (e) => {
+            count.textContent = files.length === 1 ? '1 file' : files.length + ' files';
+            preview.classList.add('show');
+        }
+
+        function setupDrop(zoneId, inputId) {
+            const zone = document.getElementById(zoneId);
+            const input = document.getElementById(inputId);
+            ['dragenter','dragover','dragleave','drop'].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }));
+            ['dragenter','dragover'].forEach(ev => zone.addEventListener(ev, () => zone.classList.add('dragover')));
+            ['dragleave','drop'].forEach(ev => zone.addEventListener(ev, () => zone.classList.remove('dragover')));
+            zone.addEventListener('drop', e => {
                 const files = e.dataTransfer.files;
-                fileInput.files = files;
-                updateDropZoneText(dropZone, files);
-            }, false);
+                try { input.files = files; } catch(_) {}
+                if (inputId === 'singleFile') renderPreview(files, 'singleList', 'singlePreview', 'singleCount');
+                else renderPreview(files, 'batchList', 'batchPreview', 'batchCount');
+            });
         }
-        
-        function updateDropZoneText(dropZone, files) {
-            const dropText = dropZone.querySelector('.drop-text');
-            const dropSubtext = dropZone.querySelector('.drop-subtext');
-            
-            if (files.length > 0) {
-                dropText.textContent = files.length === 1 ? files[0].name : `${files.length} files selected`;
-                dropSubtext.textContent = 'Ready to convert!';
-            }
-        }
-        
-        const singleDropZone = document.querySelector('#singleForm .file-drop-zone');
-        const batchDropZone = document.querySelector('#batchForm .file-drop-zone');
-        const singleFileInput = document.getElementById('singleFile');
-        const batchFileInput = document.getElementById('batchFiles');
-        
-        setupDragAndDrop(singleDropZone, singleFileInput);
-        setupDragAndDrop(batchDropZone, batchFileInput);
-        
-        singleFileInput.addEventListener('change', (e) => {
-            updateDropZoneText(singleDropZone, e.target.files);
-        });
-        
-        batchFileInput.addEventListener('change', (e) => {
-            updateDropZoneText(batchDropZone, e.target.files);
-        });
-        
-        document.getElementById('singleForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData();
-            const file = document.getElementById('singleFile').files[0];
-            
-            if (!file) {
-                document.getElementById('singleError').textContent = 'Please select a file to convert';
-                return;
-            }
-            
-            formData.append('file', file);
-            
-            document.getElementById('singleLoading').style.display = 'block';
-            document.getElementById('singleError').textContent = '';
-            
+
+        setupDrop('singleDrop', 'singleFile');
+        setupDrop('batchDrop', 'batchFiles');
+
+        document.getElementById('singleFile').addEventListener('change', e => renderPreview(e.target.files, 'singleList', 'singlePreview', 'singleCount'));
+        document.getElementById('batchFiles').addEventListener('change', e => renderPreview(e.target.files, 'batchList', 'batchPreview', 'batchCount'));
+
+        // ── SINGLE CONVERT ──
+        async function handleSingleConvert() {
+            const input = document.getElementById('singleFile');
+            const file = input.files[0];
+            hideMsg('singleMsg');
+
+            if (!file) { showMsg('singleMsg', 'Please select a file first.', 'error'); return; }
+
+            setBtn('singleBtn', true, 'Converting...', 'fas fa-magic');
+            setProgress('single', 30, 'Uploading file...');
+
             try {
-                const response = await fetch('/convert', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
+                const formData = new FormData();
+                formData.append('file', file);
+                setProgress('single', 60, 'Converting to PDF...');
+
+                const res = await fetch('/convert', { method: 'POST', body: formData });
+                setProgress('single', 90, 'Finalizing...');
+
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
                     a.download = file.name.replace(/\.[^/.]+$/, '') + '.pdf';
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    
-                    document.getElementById('singleFile').value = '';
-                    const dropText = singleDropZone.querySelector('.drop-text');
-                    const dropSubtext = singleDropZone.querySelector('.drop-subtext');
-                    dropText.textContent = 'Drop your file here';
-                    dropSubtext.textContent = 'or click to browse';
+                    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    setProgress('single', 100, 'Done!');
+                    showMsg('singleMsg', 'PDF downloaded successfully!', 'success');
+                    setTimeout(() => { input.value = ''; document.getElementById('singlePreview').classList.remove('show'); hideProgress('single'); }, 2000);
                 } else {
-                    const error = await response.json();
-                    document.getElementById('singleError').textContent = error.error;
+                    const err = await res.json().catch(() => ({ error: 'Conversion failed.' }));
+                    showMsg('singleMsg', err.error || 'Conversion failed.', 'error');
+                    hideProgress('single');
                 }
-            } catch (error) {
-                document.getElementById('singleError').textContent = 'Conversion failed. Please try again.';
+            } catch (err) {
+                showMsg('singleMsg', 'Network error. Please try again.', 'error');
+                hideProgress('single');
             }
-            
-            document.getElementById('singleLoading').style.display = 'none';
-        });
-        
-        document.getElementById('batchForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const files = document.getElementById('batchFiles').files;
-            
-            if (files.length === 0) {
-                document.getElementById('batchError').textContent = 'Please select files to convert';
-                return;
-            }
-            
-            document.getElementById('batchLoading').style.display = 'block';
-            document.getElementById('batchError').textContent = '';
-            
+
+            setBtn('singleBtn', false, 'Convert to PDF', 'fas fa-magic');
+        }
+
+        // ── BATCH CONVERT ──
+        // FIX: posts to /batch-convert with all files at once in a single request
+        async function handleBatchConvert() {
+            const input = document.getElementById('batchFiles');
+            const files = input.files;
+            hideMsg('batchMsg');
+
+            if (!files || files.length === 0) { showMsg('batchMsg', 'Please select at least one file.', 'error'); return; }
+
+            setBtn('batchBtn', true, 'Processing...', 'fas fa-bolt');
+            setProgress('batch', 20, `Uploading ${files.length} file(s)...`);
+
             try {
+                const formData = new FormData();
+                // Append ALL files under the 'files' key — matches /batch-convert endpoint
                 for (let i = 0; i < files.length; i++) {
-                    const formData = new FormData();
-                    formData.append('file', files[i]);
-                    
-                    const response = await fetch('/convert', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    if (response.ok) {
-                        const blob = await response.blob();
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = files[i].name.replace(/\.[^/.]+$/, '') + '.pdf';
-                        a.click();
-                        window.URL.revokeObjectURL(url);
-                    } else {
-                        const error = await response.json();
-                        document.getElementById('batchError').textContent = error.error;
-                    }
-                    
-                    await new Promise(resolve => setTimeout(resolve, 500));
+                    formData.append('files', files[i]);
                 }
-                
-                document.getElementById('batchFiles').value = '';
-                const dropText = batchDropZone.querySelector('.drop-text');
-                const dropSubtext = batchDropZone.querySelector('.drop-subtext');
-                dropText.textContent = 'Drop multiple files here';
-                dropSubtext.textContent = 'Each file will download as separate PDF';
-                
-            } catch (error) {
-                document.getElementById('batchError').textContent = 'Batch conversion failed. Please try again.';
+
+                setProgress('batch', 55, 'Converting all files...');
+
+                const res = await fetch('/batch-convert', { method: 'POST', body: formData });
+                setProgress('batch', 85, 'Building ZIP archive...');
+
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'converted_files.zip';
+                    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    setProgress('batch', 100, 'Done!');
+                    showMsg('batchMsg', `${files.length} file(s) converted and downloaded as ZIP!`, 'success');
+                    setTimeout(() => { input.value = ''; document.getElementById('batchPreview').classList.remove('show'); hideProgress('batch'); }, 2500);
+                } else {
+                    const err = await res.json().catch(() => ({ error: 'Batch conversion failed.' }));
+                    showMsg('batchMsg', err.error || 'Batch conversion failed.', 'error');
+                    hideProgress('batch');
+                }
+            } catch (err) {
+                showMsg('batchMsg', 'Network error. Please try again.', 'error');
+                hideProgress('batch');
             }
-            
-            document.getElementById('batchLoading').style.display = 'none';
-        });
+
+            setBtn('batchBtn', false, 'Convert All & Download ZIP', 'fas fa-bolt');
+        }
     </script>
 </body>
 </html>
