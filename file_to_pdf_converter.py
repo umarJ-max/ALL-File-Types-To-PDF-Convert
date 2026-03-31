@@ -5,7 +5,7 @@ from PIL import Image
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib.utils import ImageReader
-import docx2pdf
+import docx
 import openpyxl
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
@@ -67,8 +67,125 @@ class FileToPDFConverter:
         return output_path
     
     def _convert_word_to_pdf(self, input_path, output_path):
-        """Convert Word document to PDF"""
-        docx2pdf.convert(str(input_path), str(output_path))
+        """Convert Word document to PDF using pure Python (no LibreOffice/Word needed)"""
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib import colors
+        from reportlab.lib.units import inch
+
+        doc_in = docx.Document(str(input_path))
+        pdf = SimpleDocTemplate(
+            str(output_path),
+            pagesize=A4,
+            leftMargin=inch,
+            rightMargin=inch,
+            topMargin=inch,
+            bottomMargin=inch,
+        )
+
+        styles = getSampleStyleSheet()
+
+        # Custom styles
+        h1 = ParagraphStyle('DocH1', parent=styles['Heading1'], fontSize=18, spaceAfter=10)
+        h2 = ParagraphStyle('DocH2', parent=styles['Heading2'], fontSize=14, spaceAfter=8)
+        h3 = ParagraphStyle('DocH3', parent=styles['Heading3'], fontSize=12, spaceAfter=6)
+        body = ParagraphStyle('DocBody', parent=styles['Normal'], fontSize=10, leading=14, spaceAfter=6)
+        bold_style = ParagraphStyle('DocBold', parent=body, fontName='Helvetica-Bold')
+
+        heading_map = {
+            'heading 1': h1,
+            'heading 2': h2,
+            'heading 3': h3,
+        }
+
+        def para_to_reportlab(p):
+            """Convert a docx paragraph to a reportlab Paragraph, preserving basic inline formatting."""
+            style_name = p.style.name.lower() if p.style and p.style.name else ''
+            rl_style = heading_map.get(style_name, body)
+
+            # Build inline-formatted text
+            parts = []
+            for run in p.runs:
+                text = run.text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                if not text:
+                    continue
+                if run.bold and run.italic:
+                    parts.append(f'<b><i>{text}</i></b>')
+                elif run.bold:
+                    parts.append(f'<b>{text}</b>')
+                elif run.italic:
+                    parts.append(f'<i>{text}</i>')
+                elif run.underline:
+                    parts.append(f'<u>{text}</u>')
+                else:
+                    parts.append(text)
+
+            full_text = ''.join(parts)
+            if not full_text.strip():
+                return None
+            return Paragraph(full_text, rl_style)
+
+        story = []
+
+        for block in doc_in.element.body:
+            tag = block.tag.split('}')[-1] if '}' in block.tag else block.tag
+
+            if tag == 'p':
+                # It's a paragraph
+                from docx.oxml.ns import qn
+                p_obj = None
+                for p in doc_in.paragraphs:
+                    if p._element is block:
+                        p_obj = p
+                        break
+                if p_obj is not None:
+                    result = para_to_reportlab(p_obj)
+                    if result:
+                        story.append(result)
+                    else:
+                        story.append(Spacer(1, 6))
+
+            elif tag == 'tbl':
+                # It's a table
+                for tbl in doc_in.tables:
+                    if tbl._element is block:
+                        data = []
+                        for row in tbl.rows:
+                            row_data = []
+                            for cell in row.cells:
+                                cell_text = cell.text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                                row_data.append(Paragraph(cell_text, body))
+                            data.append(row_data)
+
+                        if data:
+                            col_count = max(len(r) for r in data)
+                            col_width = (A4[0] - 2 * inch) / col_count if col_count else inch
+
+                            tbl_style = TableStyle([
+                                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f0ece4')),
+                                ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor('#0a0a0f')),
+                                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#faf8f4')]),
+                                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#dddddd')),
+                                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                                ('LEFTPADDING', (0, 0), (-1, -1), 6),
+                                ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+                                ('TOPPADDING', (0, 0), (-1, -1), 4),
+                                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                            ])
+
+                            pdf_table = Table(data, colWidths=[col_width] * col_count, repeatRows=1)
+                            pdf_table.setStyle(tbl_style)
+                            story.append(Spacer(1, 8))
+                            story.append(pdf_table)
+                            story.append(Spacer(1, 8))
+                        break
+
+        if not story:
+            story.append(Paragraph('(Empty document)', body))
+
+        pdf.build(story)
         return output_path
     
     def _convert_excel_to_pdf(self, input_path, output_path):
