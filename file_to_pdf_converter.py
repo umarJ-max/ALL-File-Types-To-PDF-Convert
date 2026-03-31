@@ -17,6 +17,7 @@ class FileToPDFConverter:
             'text': ['.txt', '.md'],
             'word': ['.docx'],
             'excel': ['.xlsx', '.xls'],
+            'csv': ['.csv'],
         }
     
     def convert_to_pdf(self, input_path, output_path=None):
@@ -39,8 +40,10 @@ class FileToPDFConverter:
             return self._convert_word_to_pdf(input_path, output_path)
         elif file_ext in self.supported_formats['excel']:
             return self._convert_excel_to_pdf(input_path, output_path)
+        elif file_ext in self.supported_formats['csv']:
+            return self._convert_csv_to_pdf(input_path, output_path)
         else:
-            raise ValueError(f"Unsupported file format: {file_ext}")
+            raise ValueError(f"Unsupported file format: {file_ext}. Supported: PNG, JPG, BMP, GIF, TIFF, TXT, MD, DOCX, XLSX, XLS, CSV")
     
     def _convert_image_to_pdf(self, input_path, output_path):
         """Convert image to PDF"""
@@ -208,6 +211,78 @@ class FileToPDFConverter:
         doc.build(story)
         return output_path
     
+
+    def _convert_csv_to_pdf(self, input_path, output_path):
+        """Convert CSV file to PDF"""
+        import csv
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+        from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.lib import colors
+
+        styles = getSampleStyleSheet()
+        body = styles['Normal']
+        body.fontSize = 9
+
+        rows = []
+        with open(input_path, 'r', encoding='utf-8-sig', errors='replace') as f:
+            reader = csv.reader(f)
+            for row in reader:
+                rows.append(row)
+
+        if not rows:
+            doc = SimpleDocTemplate(str(output_path), pagesize=A4)
+            doc.build([Paragraph('(Empty CSV file)', styles['Normal'])])
+            return output_path
+
+        # Normalize row lengths
+        max_cols = max(len(r) for r in rows)
+        rows = [r + [''] * (max_cols - len(r)) for r in rows]
+
+        # Convert to Paragraph cells for wrapping
+        table_data = []
+        for i, row in enumerate(rows):
+            style = styles['Normal']
+            style.fontSize = 9
+            if i == 0:
+                cell_style = styles['Normal']
+                cell_style.fontSize = 9
+                cell_style.fontName = 'Helvetica-Bold'
+            else:
+                cell_style = styles['Normal']
+                cell_style.fontSize = 9
+                cell_style.fontName = 'Helvetica'
+            table_data.append([Paragraph(str(cell), cell_style) for cell in row])
+
+        from reportlab.lib.pagesizes import A4, landscape
+        from reportlab.lib.units import inch
+
+        # Use landscape for wide CSVs
+        pagesize = landscape(A4) if max_cols > 6 else A4
+        page_w = pagesize[0] - 1.2 * inch
+
+        col_w = page_w / max_cols
+
+        tbl = Table(table_data, colWidths=[col_w] * max_cols, repeatRows=1)
+        tbl.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0a0a0f')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f5f0e8')]),
+            ('GRID', (0, 0), (-1, -1), 0.4, colors.HexColor('#cccccc')),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 5),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 5),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ]))
+
+        doc = SimpleDocTemplate(str(output_path), pagesize=pagesize,
+                                leftMargin=0.6*inch, rightMargin=0.6*inch,
+                                topMargin=0.6*inch, bottomMargin=0.6*inch)
+        doc.build([tbl])
+        return output_path
+
     def batch_convert(self, folder_path, output_folder=None):
         """Convert all supported files in a folder"""
         folder_path = Path(folder_path)
